@@ -1,0 +1,80 @@
+---
+title: "base r"
+author: "Andrea Reyes"
+date: "8/9/2021"
+output: html_document
+---
+
+```{r}
+
+## -- Cargar archivos txt
+text_file <- 'data/quijote.txt'
+readLines(text_file, n=10)
+
+?readLines #? para ver la documentacion
+readLines(text_file, n=10, encoding = "UFT-8", skipNul = TRUE)
+
+library(readr)
+
+quijote_lines <- read_lines(text_file)
+str(quijote_lines)
+
+?substr()
+
+#obtener substring de un vector de caracteres
+substr(quijote_lines, 1, 150) #de la linea 1 a la 150
+
+read_lines(text_file, n_max = 20) #las primeras 20
+
+library(tidytext)
+library(tidyverse)
+
+quijote_frame <- data_frame(txt = quijote_lines)
+
+#cuales son las palabras más utilizadas en este archivo de texto?
+####FORMA 1
+# 1. generar una tabla de frecuencias 
+# 2. poner en cada fila una palabra y hacer un conteo
+?unnest_tokens
+
+quijote_words <- unnest_tokens(quijote_frame, output = word, input = txt, token = "words")
+view(quijote_words)
+
+table(quijote_words)
+
+####FORMA 2
+#conteo
+quijote_count <- count(quijote_words, word, sort = TRUE)
+view(quijote_count)
+
+#remover stopwords
+library(quanteda)
+
+spanish_stopwords <- data_frame(word=quanteda::stopwords(language = "es"))
+view(spanish_stopwords)
+
+quijote_words_clean <- anti_join(quijote_words, spanish_stopwords)
+quijote_words_clean
+
+quijote_count_clean <- count(quijote_words_clean, word, sort = TRUE)
+view(quijote_count_clean)
+
+
+## -- Cargar archivos csv
+hour <- read_csv("data/hour.csv") #escenario mas general
+read_delim("data/hour.csv", delim = ";") #delimitador del archivo
+view(hour)
+
+## -- Cargar archivos de excel
+library(readxl)
+
+bancos_acticos <- read_excel("data/bancos.xlsx")
+bancos_acticos
+
+bancos_agencias <- read_excel("data/bancos.xlsx", sheet = 2)
+view(bancos_agencias)
+
+
+
+```
+
