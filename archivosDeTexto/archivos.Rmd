@@ -69,10 +69,10 @@ view(hour)
 library(readxl)
 
 bancos_acticos <- read_excel("data/bancos.xlsx")
-bancos_acticos
+View(bancos_acticos)
 
 bancos_agencias <- read_excel("data/bancos.xlsx", sheet = 2)
-view(bancos_agencias)
+View(bancos_agencias)
 
 
 
