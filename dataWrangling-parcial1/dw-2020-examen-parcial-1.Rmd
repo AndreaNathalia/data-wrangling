@@ -104,14 +104,16 @@ Mis preguntas a resolver son: 1, 5, 7, 8, 9
     d. `df[df$variable == "valor",]`
   
 ### dplyr:
-    a.  nn 
+    a.  str_
     
-    b.
+    b. df %>% 
+        select(a,b)
     
     c. df %>% 
-        rename(old_name = new_name) 
+        rename(new_name = old_name) 
         
-    d.
+    d.filter(df, variable == "valor")
+    
     
 ##### 5. ¿Cuál es la forma correcta de cargar un archivo de texto donde el delimitador es `:`?
 
@@ -123,11 +125,14 @@ read.delim(file = "nombre_archivo.txt" header = TRUE, sep = ":")
 
 ##### 7. ¿Qué pasa si quiero agregar una nueva categoría a un factor que no se encuentra en los niveles existentes?
 
+No se puede agregar la nueva categoría, las categorías tienen que ser del mismo tamaño que los niveles. Al crear el factor se establece el conjunto fijo de valores posibles.
+
 
 ##### 8. Si en un dataframe, a una variable de tipo `factor` le agrego un nuevo elemento que *no se encuentra en los niveles existentes*, ¿cuál sería el resultado esperado y por qué?
-    * El nuevo elemento
+    * `El nuevo elemento`
     * `NA`
 
+El resultado será `NA` porque cualquier valor no fijado en el factor, es convertido a NA.
 
 ##### 9. En SQL, ¿para qué utilizamos el keyword `HAVING`? 
 
@@ -143,16 +148,50 @@ Si una consulta tiene GROUP BY, las filas de la tabla de agrupan y agregan. Desp
 
 ```{r }
 ###resuelva acá
+library(dplyr)
 
+df <- readRDS("parcial_anonimo.rds")
+#View(df)
+
+clientes <- df %>% 
+              select(Cliente, Pais, Venta)%>%
+              group_by(Cliente, Venta)%>%
+              summarise(clientes_repetidos = n_distinct(Pais))%>%
+              filter(clientes_repetidos > 1)
+              
+clientes
+
+rentable <- max(clientes$Venta)
+rentable
 ```
 
-
+El cliente más rentable es c53868a0 porque de los clientes que están en más de un país, es el  que más ventas representa. 
 
 
 ## B
 
 ```{r }
 ###resuelva acá
+library(dplyr)
+#B. Estrategia de negocio ha decidido que ya no operará en aquellos territorios cuyas pérdidas sean "considerables". Bajo su criterio, ¿cuáles son estos territorios y por qué ya no debemos operar ahí?
 
+# grupo
+territorios <- df %>% 
+              select(Territorio, Venta)%>%
+              group_by(Territorio, Venta)
+              
+territorios
+
+# Quien tiene pérdidas más altas
+perdidas <- which.min(territorios$Venta)
+
+terr <- territorios$Territorio[perdidas]
+vent <- territorios$Venta[perdidas]
+
+terr
+vent
 ```
+
+El territorio con el que ya no se debe operar es 72520ba2 porque es el territorio que más perdidas representa en cuanto a ventas.
+
 
