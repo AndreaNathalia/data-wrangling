@@ -1,34 +1,19 @@
----
-title: "Lab5"
-author: "Andrea Reyes"
-date: "9/30/2021"
-output: rmarkdown::github_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+Lab5
+================
+Andrea Reyes
+9/30/2021
 
 # Laboratorio 5
 
-```{r, include=FALSE}
-# Librerias
-library(readxl)
-library(lubridate)
-library(dplyr)
-library(nycflights13)
-```
-
-
-
 ## Parte 1: Predecir un eclipse solar
-```{r}
+
+``` r
 #Eclipse anterior
 eclipseTotal <- ymd_hms("2017 aug 21 18:26:40", tz="GMT")
 eclipseTotal <- with_tz(eclipseTotal, "GMT")
 ```
 
-```{r}
+``` r
 #Siguiente eclipse
 # Un Synodic Month equivale a 29 días con 12 horas, con 44 minutos y 3 segundos.
 SynodicMonth <- days(29) + hours(12) + minutes(44) + seconds(3)
@@ -37,10 +22,9 @@ SynodicMonth <- days(29) + hours(12) + minutes(44) + seconds(3)
 Saros <- 223 * SynodicMonth
 
 siguienteEclipseSolar <- eclipseTotal + Saros
-
 ```
 
-```{r}
+``` r
 # Requisitos (variables)
 
 #Variable con la fecha del eclipse histórico.
@@ -56,35 +40,41 @@ SynodicMonth <- as_tibble(SynodicMonth)
 siguienteEclipseSolar <- as_tibble(siguienteEclipseSolar)
 ```
 
-Fecha del eclipse histórico: `r eclipseTotal$value`
+Fecha del eclipse histórico: 2017-08-21 18:26:40
 
-Saros: `r Saros`
+Saros: 6467d 2676H 9812M 669S
 
-Synodic Month: `r SynodicMonth`
+Synodic Month: 29d 12H 44M 3S
 
-##### El siguiente eclipse solar será en: `r siguienteEclipseSolar$value`
-
-
+##### El siguiente eclipse solar será en: 2035-09-02 02:09:49
 
 ## Parte 2: Agrupaciones y operaciones con fechas
 
 Leer data
-```{r}
+
+``` r
 df <- read_excel("data.xlsx")
 ```
 
 Ver data
-```{r}
+
+``` r
 #View(df)
 ```
 
-
 ##### 1. ¿En qué meses existe una mayor cantidad de llamadas por código?
-```{r}
+
+``` r
 df <- df %>%
   mutate(`Fecha Creación` = dmy(`Fecha Creación`)) %>%
   mutate(`Fecha Final` = dmy(`Fecha Final`))
+```
 
+    ## Warning: 104237 failed to parse.
+
+    ## Warning: 104237 failed to parse.
+
+``` r
 mes <- df %>%
     select(`Fecha Final`, Call, Cod) %>%
     group_by(month = lubridate::floor_date(`Fecha Final`, "month"), Cod) %>%  
@@ -92,25 +82,25 @@ mes <- df %>%
     summarise(sum(Call)) 
 ```
 
-```{r}
+    ## `summarise()` has grouped output by 'month'. You can override using the `.groups` argument.
+
+``` r
 mes = mes[-13, ] 
 mayor <- which.max(mes$`sum(Call)`)
 ```
 
-```{r}
+``` r
 fecha <- mes[mayor,]$month
 fecha <- as_tibble(fecha)
 llamadas <- mes[mayor,]$`sum(Call)`
 llamadas <- as_tibble(llamadas)
 ```
 
-##### El mes que tiene la mayor cantidad de llamadas por códido es: `r fecha` (Mayo) con `r llamadas` llamadas
-
-
-
+##### El mes que tiene la mayor cantidad de llamadas por códido es: 2017-05-01 (Mayo) con 314 llamadas
 
 ##### 2. ¿Qué día de la semana es el más ocupado?
-```{r}
+
+``` r
 dia <- df %>%
     select(`Fecha Final`, Call) %>%
     mutate(dia = weekdays(`Fecha Final`)) %>%
@@ -119,31 +109,30 @@ dia <- df %>%
     summarise(sum(Call))
 ```
 
-```{r}
+``` r
 dia = dia[-8, ] 
 ocupado <- which.max(dia$`sum(Call)`)
 ```
 
-```{r}
+``` r
 dias <- dia[ocupado,]$dia
 dias <- as_tibble(dias)
 llamadas <- dia[ocupado,]$`sum(Call)`
 llamadas <- as_tibble(llamadas)
 ```
 
-##### El día más ocupado es: `r dias` con `r llamadas` llamadas
-
-
+##### El día más ocupado es: Wednesday con 532 llamadas
 
 ##### 3. ¿Qué mes es el más ocupado?
-```{r}
+
+``` r
 mesOcupado <- df %>%
           select(`Fecha Final`, Call, Email, SMS) %>%
           group_by(month = lubridate::floor_date(`Fecha Final`, "month")) %>%  
           summarise(sum(Call), sum(Email), sum(SMS))
 ```
 
-```{r}
+``` r
 mesOcupado = mesOcupado[-13, ] 
 sumaTrabajo <- rowSums(mesOcupado[2:4])
 mayor <- which.max(sumaTrabajo)
@@ -151,17 +140,16 @@ m <- max(sumaTrabajo)
 m <- as_tibble(m)
 ```
 
-```{r}
+``` r
 fecha <- mesOcupado[mayor,]$month
 fecha <- as_tibble(fecha)
 ```
 
-##### El mes más ocupado es: `r fecha` (Marzo) con una carga de trabajo de `r m` entre llamadas, email's y SMS's
-
-
+##### El mes más ocupado es: 2017-03-01 (Marzo) con una carga de trabajo de 1.3813^{4} entre llamadas, email’s y SMS’s
 
 ##### 4. ¿Existe una concentración o estacionalidad en la cantidad de llamadas?
-```{r}
+
+``` r
 concentracion <- df %>%
               select(`Fecha Final`, Call,`Hora Final`) %>%
               mutate(hora = hour(`Hora Final`)) %>%
@@ -175,11 +163,13 @@ concentracion <- df %>%
               summarise(sum(Call))
 ```
 
-```{r}
+    ## `summarise()` has grouped output by 'season'. You can override using the `.groups` argument.
+
+``` r
 cantLlamadas <- which.max(concentracion$`sum(Call)`)
 ```
 
-```{r}
+``` r
 estacion <- concentracion[cantLlamadas,]$season
 hora <- concentracion[cantLlamadas,]$hora
 llamadas <- concentracion[cantLlamadas,]$`sum(Call)`
@@ -189,13 +179,11 @@ hora <- as_tibble(hora)
 llamadas <- as_tibble(llamadas)
 ```
 
-
-##### La concentración de llamadas se da en: `r estacion` a las `r hora` horas con `r llamadas` llamadas 
-
-
+##### La concentración de llamadas se da en: Fall a las 0 horas con 62 llamadas
 
 ##### 5.¿Cuántos minutos dura la llamada promedio?
-```{r}
+
+``` r
 prom <- df %>%
       select(Call, `Hora Creación`, `Hora Final`) %>%
       filter(Call == 1) %>%
@@ -204,23 +192,30 @@ prom <- df %>%
       summarise(prmd = mean(x))
 ```
 
-```{r}
+``` r
 p <- prom$prmd
 p <- as_tibble(p)
 ```
 
-##### La llamada promedio dura: `r p` minutos 
-
-
-
+##### La llamada promedio dura: 14.5579039 minutos
 
 ## Parte 3: Signo Zodiacal
-```{r}
+
+``` r
 FechaNacimiento = ymd("2001-6-21")
 
 print("Tu fecha de nacimiento es: ")
-FechaNacimiento
+```
 
+    ## [1] "Tu fecha de nacimiento es: "
+
+``` r
+FechaNacimiento
+```
+
+    ## [1] "2001-06-21"
+
+``` r
 if (month(FechaNacimiento) == 3 || month(FechaNacimiento) == 4  & day(FechaNacimiento) >= 20){ 
   print("Tu signo zodiacal es Aries") 
 }else if (month(FechaNacimiento) == 4 || month(FechaNacimiento) == 5  & day(FechaNacimiento) >= 21){ 
@@ -246,14 +241,15 @@ if (month(FechaNacimiento) == 3 || month(FechaNacimiento) == 4  & day(FechaNacim
 }else if (month(FechaNacimiento) == 2 || month(FechaNacimiento) == 3  & day(FechaNacimiento) >= 19){ 
   print("Tu signo zodiacal es Piscis")
 }
-
 ```
 
+    ## [1] "Tu signo zodiacal es Géminis"
 
 ## Parte 4: Flights
 
 ##### 1. Genere 4 nuevas columnas para cada variable con formato fecha y hora.
-```{r}
+
+``` r
 f <- flights %>%
   mutate(departure = substr(as.POSIXct(sprintf("%04.0f", dep_time), format='%H%M'), 12, 16)) %>%
   mutate(arrival = substr(as.POSIXct(sprintf("%04.0f", arr_time), format='%H%M'), 12, 16)) %>%
@@ -262,6 +258,20 @@ f <- flights %>%
 f
 ```
 
-
-
-
+    ## # A tibble: 336,776 × 23
+    ##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+    ##    <int> <int> <int>    <int>          <int>     <dbl>    <int>          <int>
+    ##  1  2013     1     1      517            515         2      830            819
+    ##  2  2013     1     1      533            529         4      850            830
+    ##  3  2013     1     1      542            540         2      923            850
+    ##  4  2013     1     1      544            545        -1     1004           1022
+    ##  5  2013     1     1      554            600        -6      812            837
+    ##  6  2013     1     1      554            558        -4      740            728
+    ##  7  2013     1     1      555            600        -5      913            854
+    ##  8  2013     1     1      557            600        -3      709            723
+    ##  9  2013     1     1      557            600        -3      838            846
+    ## 10  2013     1     1      558            600        -2      753            745
+    ## # … with 336,766 more rows, and 15 more variables: arr_delay <dbl>,
+    ## #   carrier <chr>, flight <int>, tailnum <chr>, origin <chr>, dest <chr>,
+    ## #   air_time <dbl>, distance <dbl>, hour <dbl>, minute <dbl>, time_hour <dttm>,
+    ## #   departure <chr>, arrival <chr>, schedDept <chr>, schedArr <chr>
