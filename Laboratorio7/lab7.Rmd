@@ -1,0 +1,121 @@
+---
+title: "Lab 7"
+author: "Andrea Reyes"
+date: "10/10/2021"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+# Librerias
+library(readr)
+library(dplyr)
+library(lubridate)
+```
+
+```{r, include=FALSE}
+# Cargar dataset
+df <- read.csv("c1.csv")
+```
+
+```{r, include=FALSE}
+##### Limpieza de datos
+df <- df %>%
+  mutate(factura = gsub("^ Q-   ", "",factura)) %>% mutate(factura = gsub("^ Q", "",factura)) %>%
+  mutate(Camion_5 = gsub("^ Q-   ", "",Camion_5)) %>% mutate(Camion_5 = gsub("^ Q", "",Camion_5)) %>%
+  mutate(fijoCamion_5 = gsub("^ Q-   ", "",fijoCamion_5)) %>% mutate(fijoCamion_5 = gsub("^ Q", "",fijoCamion_5)) %>%
+  mutate(directoCamion_5 = gsub("^ Q-   ", "",directoCamion_5)) %>% mutate(directoCamion_5 = gsub("^ Q", "",directoCamion_5)) %>%
+  mutate(Pickup = gsub("^ Q-   ", "",Pickup)) %>% mutate(Pickup = gsub("^ Q", "",Pickup)) %>%
+  mutate(fijoPickup = gsub("^ Q-   ", "",fijoPickup)) %>% mutate(fijoPickup = gsub("^ Q", "",fijoPickup)) %>%
+  mutate(directoPickup = gsub("^ Q-   ", "",directoPickup)) %>% mutate(directoPickup = gsub("^ Q", "",directoPickup)) %>%
+  mutate(Moto = gsub("^ Q-   ", "",Moto)) %>% mutate(Moto = gsub("^ Q", "",Moto)) %>%
+  mutate(fijoMoto = gsub("^ Q-   ", "",fijoMoto)) %>% mutate(fijoMoto = gsub("^ Q", "",fijoMoto)) %>%
+  mutate(directoMoto = gsub("^ Q-   ", "",directoMoto)) %>% mutate(directoMoto = gsub("^ Q", "",directoMoto)) %>%
+  
+  mutate(Camion_5 = as.integer(Camion_5)) %>% mutate(Pickup = as.numeric(Pickup)) %>% mutate(Moto = as.numeric(Moto)) %>%
+  mutate(fijoCamion_5 = as.numeric(fijoCamion_5)) %>% mutate(fijoPickup = as.numeric(fijoPickup)) %>%
+  mutate(fijoMoto = as.numeric(fijoMoto)) %>%
+  
+  mutate(directoCamion_5 = as.numeric(directoCamion_5)) %>%
+  mutate(directoPickup = as.numeric(directoPickup)) %>%
+  mutate(directoMoto = as.numeric(directoMoto)) %>%
+  mutate(factura = as.integer(factura)) %>%
+  
+  mutate(Fecha = sub("(.{6})(.*)", "\\120\\2", Fecha)) %>%
+  mutate(Fecha = as_date(Fecha, format = "%d-%m-%Y")) %>%
+  
+  replace(is.na(.), 0) %>%
+  mutate(tipoVehiculo = ifelse((Camion_5 != 0),"Camion",
+                        ifelse((Pickup != 0),"Pickup",
+                        ifelse((Moto != 0),"Moto","")))) %>%
+  mutate(distancia = ifelse(X5.30 == " x ", "5-30",
+                     ifelse(X30.45 == " x ", "30-45",
+                     ifelse(X45.75 == " x ", "45-75",
+                     ifelse(X75.120 == " x ", "75-120",
+                     ifelse(X120. == " x ", "120+", ""))))))
+
+df$X <- NULL
+df$X.1 <- NULL
+df$X.2 <- NULL
+df$X.3 <- NULL
+df$X.4 <- NULL
+df$X.5 <- NULL
+```
+
+```{r, include=FALSE}
+# Ver dataset
+#View(df)
+```
+
+
+## Análisis - Inversiones en Energía, S.A.
+
+#### Estado de resultados 2017
+```{r}
+# Facturacion de 2017 (ventas)
+facturacion <- sum(df$factura)
+facturacion <- as_tibble(facturacion)
+```
+
+```{r}
+# Costo de ventas
+cVentas <- sum(df$directoCamion_5) + sum(df$directoMoto) + sum(df$directoPickup) + sum(df$fijoCamion_5) + sum(df$fijoMoto) + sum(df$fijoPickup)
+cVentas <- as_tibble(cVentas)
+```
+
+```{r}
+# Utilidad 
+utilidad <- facturacion - cVentas
+utilidad <- as_tibble(utilidad)
+```
+
+Ventas = `r facturacion`
+
+Costo de ventas = `r cVentas`
+
+Utilidad = `r utilidad`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
